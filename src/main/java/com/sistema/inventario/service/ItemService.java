@@ -12,7 +12,7 @@ public class ItemService {
     @Autowired
     private ItemRepository itemRepository;
 
-    public Item createUser(Item item){
+    public Item createItem (Item item){
         return itemRepository.save(item);
     }
 
@@ -20,7 +20,7 @@ public class ItemService {
         return itemRepository.findById(id).get();
     }
 
-    public Item updateUser(Item item, long id){
+    public Item updateItem (Item item, long id){
         if (itemRepository.existsById(id)){
             Item itemBd = itemRepository.findById(id).get();
             itemBd.setName(item.getName());
@@ -41,9 +41,10 @@ public class ItemService {
         }
         return false;
     }
-    public List<Item> findAllUsers(){
+    public List<Item> findAllItem (){
         return (List<Item>) itemRepository.findAll();
     }
+
 }
 
 
