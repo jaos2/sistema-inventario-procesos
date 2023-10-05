@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.sistema.inventario.model.Item;
-import com.sistema.inventario.service.ItemService;
 
 import java.util.List;
 
@@ -19,7 +17,7 @@ public class ItemController {
 
     @PostMapping("item")
     public ResponseEntity<Item> create (@RequestBody Item item){
-        return new ResponseEntity<>(itemService.createUser(item), HttpStatus.CREATED);
+        return new ResponseEntity<>(itemService.createItem(item), HttpStatus.CREATED);
     }
     @GetMapping("item/{id}")
 
@@ -31,7 +29,7 @@ public class ItemController {
 
     @PutMapping("item/{id}")
     public ResponseEntity<Item> update(@RequestBody Item item,@PathVariable Long id){
-        return ResponseEntity.ok(itemService.updateUser(item, id));
+        return ResponseEntity.ok(itemService.updateItem(item, id));
     }
 
 
@@ -44,7 +42,7 @@ public class ItemController {
 
     @GetMapping("item")
     public ResponseEntity<List<Item>> getAll(){
-        return ResponseEntity.ok(itemService.findAllUsers());
+        return ResponseEntity.ok(itemService.findAllItem());
     }
 
 }
