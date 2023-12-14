@@ -7,20 +7,25 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.Set;
+
+
 @Entity
-@Table(name = "category")
 @Data
+@Table(name = "category")
 public class CategoryModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long category_id;
     @Column(unique = true)
-    @NotBlank(message = "El nombre de la categoria no puede estar vacìo")
-    @Size(max = 30, min = 3, message = "La categoria debe tener de 3 a 30 caracteres")
+    @NotBlank(message = "Category name cannot be empty")
+    @Size(max = 50, min = 3, message = "Category name must be between 3 and 50 characters")
     private String nameCategory;
-    @NotBlank(message = "La descripcion no puede estar vacìa")
-    @Size(max = 200, message = "La descripciòn debe tener un maximo de 200 caracteres")
+    @NotBlank(message = "Description cannot be empty")
+    @Size(max = 300, message = "Maximum 300 characters in description")
     private String description;
+    @NotBlank(message = "Status cannot be empty")
+    private String status;
 
 }
-

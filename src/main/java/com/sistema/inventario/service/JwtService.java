@@ -1,41 +1,55 @@
 package com.sistema.inventario.service;
 
-import com.sistema.inventario.model.UserModel;
+import com.sistema.inventario.exception.AuthenticationFailedException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.websocket.Decoder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import io.jsonwebtoken.Jwts;
+
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY="a5698bd301abb6affed96b9685175fe69dabaf698581bb60f4a596aaddc1286a";
-
-    public String getToken(UserModel user) {
-        return getToken(new HashMap<>(), (UserDetails) user);
+    private static final String SECRET_KEY = "a5698bd301abb6affed96b9685175fe69dabaf698581bb60f4a596aaddc1286a";
+    private static final long accessTokenValidity = 60*60*1000;
+    public String getToken(UserDetails user){
+        return getToken(new HashMap<>(), user);
     }
 
-    private String getToken(Map<String,Object> extraClaims, UserDetails user){
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(user.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+1000*60*24))
-                .signWith(getKey(), SignatureAlgorithm.HS256)
-                .compact();
+    private String getToken(Map<String, Object> extraClaims, UserDetails user){
+          return Jwts.builder().
+                setClaims(extraClaims).
+                setSubject(user.getUsername()).
+                setIssuedAt(new Date(System.currentTimeMillis())).
+                setExpiration(new Date(System.currentTimeMillis() + accessTokenValidity)).
+                signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes())).
+                compact();
     }
 
-    private Key getKey() {
-        byte[] KeyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(KeyBytes);
+    public static UsernamePasswordAuthenticationToken getAuthentication(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY.getBytes())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String email = claims.getSubject();
+
+            return new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
+        } catch (JwtException e) {
+            throw new AuthenticationFailedException(e.getMessage());
+        }
     }
+
 }

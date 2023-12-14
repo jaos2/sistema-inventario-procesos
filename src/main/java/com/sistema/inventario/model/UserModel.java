@@ -1,4 +1,5 @@
 package com.sistema.inventario.model;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -6,10 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,47 +25,39 @@ public class UserModel implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @NotBlank(message = "Primer nombre es requerido")
-    @Size(min= 1, max = 100, message = "El primer nombre debe tener de 1 a 100 caracteres")
+    @NotBlank(message = "First name is required")
+    @Size(min= 1, max = 100, message = "First name must be between 1 and 100 characters")
     private String firstName;
-    
-    @NotBlank(message = "El apellido es requerido")
-    @Size(min= 1, max = 100, message = "El apellido debe tener de 1 a 100 caracteres")
+    @NotBlank(message = "Last name is required")
+    @Size(min= 1, max = 100, message = "Last name must be between 1 and 100 characters")
     private String lastName;
-
     @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<AddressModel> address;
-    
-    @NotBlank(message = "Email es requerido")
-    @Email(message = "El email debe ser valido")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
     @Column(unique = true, nullable = false)
     private String email;
-    
-    @NotBlank(message = "El telefono es requerido")
-    @Size(min= 1, max = 16, message = "El numero de telefono debe tener de 1 a 16 caracteres")
-    @Pattern(regexp = "(^$|[0-9]{10})", message = "El telegono debe tener 10 caracteres")
+    @Pattern(regexp = "(^$|[0-9]{10})", message = "Phone number must be a valid number of 10 digits")
     private String phone;
-    
-    @NotNull(message = "Contraseña requerida")
-    @Size(min = 8, max = 255,message = "la contraseña debe tener de 8 a 255 caracteres")
+    @NotNull(message = "Password is required")
+    @Size(min = 8, max = 255,message = "password min 8 characters and max 255")
     private String password;
-    
-    @NotBlank(message = "Documento requerido")
+    @NotBlank(message = "Document is required")
     @Column(unique = true, nullable = false)
-    @Size(min= 5, max = 20, message = "El numero de documento debe tener de 5 a 20 caracteres")
+    @Size(min= 5, max = 20, message = "Document must be between 5 and 20 characters")
     private String document;
-
+    @Enumerated( EnumType.STRING)
+    private RoleModel roleModel;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority(roleModel.name()));
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return this.getEmail();
     }
 
     @Override
@@ -85,6 +74,10 @@ public class UserModel implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user")
+    private List<AddressModel> addressList;
 
     @Override
     public boolean isEnabled() {

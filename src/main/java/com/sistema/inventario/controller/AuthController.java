@@ -1,12 +1,15 @@
 package com.sistema.inventario.controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
+import com.sistema.inventario.dto.AuthResponse;
+import com.sistema.inventario.dto.LoginRequest;
+import com.sistema.inventario.model.UserModel;
 import com.sistema.inventario.service.AuthService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -21,7 +24,8 @@ public class AuthController {
     }
 
     @PostMapping(value = "register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserModel request){
         return ResponseEntity.ok(authService.register(request));
     }
+
 }

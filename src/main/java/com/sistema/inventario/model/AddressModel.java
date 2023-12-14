@@ -6,29 +6,30 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Entity
 @Data
+@Entity
 @Table(name = "address")
 public class AddressModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "La direccion es requerida")
-    @Size(max = 100, message = "La direccion debe tener un maximo de 100 caracteres")
+    @NotBlank(message = "street address is required")
+    @Size(max = 100, message = "Street address must be a maximum of 100 characters")
     private String streetAddress;
-    @NotBlank(message = "la ciudad es requerida")
-    @Size(max = 100, message = "la ciudad debe tener un maximo de 100 caracteres")
+    @NotBlank(message = "city is required")
+    @Size(max = 100, message = "City must be a maximum of 100 characters")
     private String city;
-    @NotBlank(message = "el estado es requerido")
-    @Size(max = 100, message = "El estado debe tener un maximo de 100 caracteres")
+    @NotBlank(message = "state is required")
+    @Size(max = 100, message = "State must be a maximum of 100 characters")
     private String state;
-    @NotBlank(message = "Codigo postal requerido")
-    @Size(min = 5, max = 10, message = "El codigo postal debe tener un maximo de 100 caracteres")
+    @NotBlank(message = "Postal code is required")
+    @Size(min = 5, max = 10, message = "Postal code must be between 5 and 10 characters")
     private String postalCode;
     @JsonIgnore
     private Boolean status = Boolean.TRUE;
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")
-    private  UserModel user;
+    private UserModel user;
 
 }

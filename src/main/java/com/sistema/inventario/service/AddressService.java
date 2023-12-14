@@ -1,9 +1,9 @@
 package com.sistema.inventario.service;
 
+import com.sistema.inventario.exception.NotFoundException;
+import com.sistema.inventario.repository.AddressRepository;
 import com.sistema.inventario.model.AddressModel;
 import com.sistema.inventario.model.UserModel;
-import com.sistema.inventario.repository.AddressRepository;
-import com.sistema.inventario.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +12,10 @@ import java.util.Optional;
 
 @Service
 public class AddressService {
+
     @Autowired
     private AddressRepository addressRepository;
+
     @Autowired
     private UserService userService;
 
@@ -25,11 +27,11 @@ public class AddressService {
 
     public AddressModel disabledAddress(Long id){
         if(id==0){
-            throw  new NotFoundException("El id direccion es nlo");
+            throw  new NotFoundException("Address id is null");
         }
         Optional<AddressModel> address = addressRepository.findById(id);
         if(address.isEmpty()){
-            throw  new NotFoundException("Direccion nn encontrada");
+            throw  new NotFoundException("Address not found");
         }
         address.get().setStatus(Boolean.FALSE);
         return addressRepository.save(address.get());
@@ -38,7 +40,7 @@ public class AddressService {
     public  AddressModel getAddressById(Long id){
         Optional<AddressModel> address = addressRepository.findById(id);
         if(address.isEmpty()){
-            throw  new NotFoundException("Direccion nn encontrada");
+            throw  new NotFoundException("Address not found");
         }
         return address.get();
     }
@@ -46,7 +48,7 @@ public class AddressService {
     public  List<AddressModel> getAllAddress(){
         List<AddressModel> address = (List<AddressModel>) addressRepository.findAll();
         if(address.isEmpty()){
-            throw  new NotFoundException("Direccion nn encontrada");
+            throw  new NotFoundException("Addresses not found");
         }
         return address;
     }

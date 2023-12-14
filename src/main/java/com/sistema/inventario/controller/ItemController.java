@@ -1,17 +1,19 @@
 package com.sistema.inventario.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import com.sistema.inventario.model.ItemModel;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import com.sistema.inventario.service.ItemService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 public class ItemController {
+
     @Autowired
     private ItemService itemService;
 
@@ -40,6 +42,5 @@ public class ItemController {
     public ResponseEntity <List<ItemModel>> getAll(){
         return ResponseEntity.ok(itemService.findAllItems());
     }
-
 
 }

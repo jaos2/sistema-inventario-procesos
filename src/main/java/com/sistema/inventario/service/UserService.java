@@ -1,73 +1,80 @@
 package com.sistema.inventario.service;
 
-import com.sistema.inventario.exceptions.AlreadyExistsException;
-import com.sistema.inventario.exceptions.NotFoundException;
-import com.sistema.inventario.model.UserModel;
+import com.sistema.inventario.exception.AlreadyExistsException;
 import com.sistema.inventario.repository.UserRepository;
+import com.sistema.inventario.exception.NotFoundException;
+import com.sistema.inventario.model.UserModel;
+import com.sistema.inventario.util.Constants;
+import com.sistema.inventario.model.RoleModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public UserModel createUser(UserModel user){
-        List<UserModel> existingUsers = userRepository.findByDocument(user.getDocument());
-        if(!existingUsers.isEmpty()){
-            throw new AlreadyExistsException("El usuario con el nombre " + user.getFirstName()+" "+user.getLastName() +" y documento "+user.getDocument()+ " ya existe");
-        };
-        return userRepository.save(user);
+    public UserModel createUser(UserModel userModelReq){
+        Optional<UserModel> existingUserByEmail = userRepository.findByEmail(userModelReq.getEmail());
+
+    
+        Optional<UserModel> existingUserByDocument = userRepository.findByDocument(userModelReq.getDocument());
+        if (existingUserByDocument.isPresent()) {
+            throw new AlreadyExistsException(Constants.DOCUMENT_ALREADY_EXISTS.getMessage());
+        }
+    
+        userModelReq.setPassword(passwordEncoder.encode(userModelReq.getPassword()));
+        userModelReq.setRoleModel(RoleModel.USER);
+        return userRepository.save(userModelReq);
     }
-
     public UserModel getUserById(Long id){
-        if( id==0){
-            throw  new NotFoundException("El id del usuario es nulo");
-        }
-        Optional<UserModel> user = userRepository.findById(id);
-        if(user.isEmpty()){
-            throw  new NotFoundException("Usuario no encontrado");
-        }
-        return  user.get();
+        if(id == null)
+            throw new RuntimeException(Constants.USER_NOT_FOUND.getMessage());
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException(Constants.USER_NOT_FOUND.getMessage()));
     }
 
+  public List<UserModel> findAllUsers(){
+        List<UserModel> users = StreamSupport.stream(userRepository.findAll().spliterator(), false).collect(Collectors.toList());
 
-    public UserModel updateUser(UserModel user, Long id){
-        if(!userRepository.existsById(id)){
-            throw new NotFoundException("Usuario no encontrado");
-        }
-        List<UserModel> existingUsers = userRepository.findByDocument(user.getDocument());
-        if(!existingUsers.isEmpty()){
-            throw new AlreadyExistsException("El usuario con el nombre " + user.getFirstName()+" "+user.getLastName() +" y documento "+user.getDocument()+ " ya existe");
-        };
-            UserModel userBd = userRepository.findById(id).get();
-            userBd.setFirstName(user.getFirstName());
-            userBd.setLastName(user.getLastName());
-            userBd.setAddress(user.getAddress());
-            userBd.setEmail(user.getEmail());
-            userBd.setPhone(user.getPhone());
-            return userRepository.save(userBd);
+    return users;   
     }
 
-    public Boolean deleteUserById(Long id){
-        if(userRepository.existsById(id)){
-            userRepository.deleteById(id);
-            return true;
-        }else{
-            throw new NotFoundException("Usuario no encontrado (id)");
+    public UserModel updateUser(Long id, UserModel userModelReq){
+        Optional<UserModel> existingUserByEmail = userRepository.findByEmail(userModelReq.getEmail());
+
+
+        Optional<UserModel> existingUserByDocument = userRepository.findByDocument(userModelReq.getDocument());
+        if (existingUserByDocument.isPresent() && !existingUserByDocument.get().getId().equals(id)) {
+            throw new AlreadyExistsException(Constants.DOCUMENT_ALREADY_EXISTS.getMessage());
         }
 
+        Optional<UserModel> userToUpdateOpt = userRepository.findById(id);
+        if (!userToUpdateOpt.isPresent()) {
+            throw new NotFoundException(Constants.USER_NOT_FOUND.getMessage());
+        }
+
+        UserModel userToUpdate = userToUpdateOpt.get();
+        userToUpdate.setEmail(userModelReq.getEmail());
+        userToUpdate.setFirstName(userModelReq.getFirstName());
+        userToUpdate.setLastName(userModelReq.getLastName());
+        userToUpdate.setPassword(passwordEncoder.encode(userModelReq.getPassword()));
+        userToUpdate.setRoleModel(RoleModel.USER);
+        return userRepository.save(userToUpdate);
     }
 
-    public List<UserModel> findAllUsers(){
-       List<UserModel> users = userRepository.findAll();
-       if(users.isEmpty()){
-           throw  new NotFoundException("Usuarios no encontrados");
-
-       }
-       return users;
+    public boolean deleteUser(Long id){
+        UserModel userModelBd = this.getUserById(id);
+        userRepository.deleteById(userModelBd.getId());
+        return true;
     }
+
 }
